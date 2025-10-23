@@ -163,16 +163,16 @@ def visualize_movies(df):
 # 5. Function to visualize Hypothesis 1 : Low Budget, High IMDb Rating
 def visualize_hypothesis_1(df):
 
+    # Drop rows missing either value
+    subset = df.dropna(subset=["production_budget", "imdb_rating"])
+
     # --- Movies with lower production budgets can still achieve high IMDb ratings ---
-    plt.scatter(df["production_budget"], df["imdb_rating"], alpha=0.7)
+    plt.scatter(subset["production_budget"], subset["imdb_rating"], alpha=0.7)
     plt.xlabel("IMDb Rating")
     plt.ylabel("Production Budget ($)")
     plt.title("IMDb Rating vs Production Budget")
     plt.grid(True)
     plt.show()
-
-    # Drop rows missing either value
-    subset = df.dropna(subset=["production_budget", "imdb_rating"])
 
     # Define “low budget” (bottom 25%) & “high rating” (top 25%)
     low_budget = subset["production_budget"].quantile(0.25)
@@ -183,6 +183,7 @@ def visualize_hypothesis_1(df):
                 (subset["imdb_rating"] >= high_rating)]
          .sort_values("imdb_rating", ascending=False)
          .head(10))
+    display(top10)
 
     # Fallback if fewer than 10 found
     if len(top10) < 10:
@@ -206,7 +207,7 @@ def visualize_hypothesis_1(df):
 def visualize_hypothesis_2(df):
     
     # Drop rows missing either value
-    subset = df.dropna(subset=["production_budget", "imdb_rating"])
+    subset = df.dropna(subset=["profit", "imdb_rating"])
 
     # --- 📈 Correlation IMDb Rating ↔ Profit ---
     correlation = subset['imdb_rating'].corr(subset['profit'])
@@ -229,6 +230,7 @@ def visualize_hypothesis_2(df):
     top10 = (subset[subset["imdb_rating"] >= high_rating]
              .sort_values("profit", ascending=False)
              .head(10))
+    display(top10)
 
     # Fallback if fewer than 10 found
     if len(top10) < 10:
@@ -251,14 +253,19 @@ def visualize_hypothesis_2(df):
 # 7. Function to visualize Hypothesis 3 : Some Genres are More Profitable
 def visualize_hypothesis_3(movie_df_cleaned):
 
+    # Drop rows missing either value
+    subset = movie_df_cleaned.dropna(subset=["production_budget", "worldwide_gross", "imdb_rating", "genre"])
+
     # --- Return On Investment (ROI) Calculation ---
-    movie_df_cleaned['roi'] = (movie_df_cleaned['worldwide_gross'] - movie_df_cleaned['production_budget']) / movie_df_cleaned['production_budget']
-    
+    subset["profit"] = subset["worldwide_gross"] - subset["production_budget"]
+    subset['roi'] = (subset['profit']) / subset['production_budget']
+
     # Clean ROI data: keep only reasonable values (drop extreme outliers)
-    roi_data = movie_df_cleaned[(movie_df_cleaned['roi'] > -1) & (movie_df_cleaned['roi'] < 10)]
+    roi_data = subset[(subset['roi'] > -1) & (subset['roi'] < 10)]
 
     # Group by genre and calculate average ROI and IMDb rating
     genre_stats = roi_data.groupby('genre')[['roi', 'imdb_rating']].mean().sort_values(by='roi', ascending=False)
+    genre_stats_profit = subset.groupby('genre')['profit'].mean().sort_values(ascending=False)
 
     print("📊 Average ROI and IMDb Rating by Genre:")
     display(genre_stats)
@@ -272,6 +279,16 @@ def visualize_hypothesis_3(movie_df_cleaned):
     plt.xlabel("Genre")
     plt.ylabel("Average ROI")
     plt.show()
+
+    # Display by average profit
+    plt.figure(figsize=(12, 6))
+    sns.barplot(data=genre_stats_profit.reset_index(), x='genre', y='profit', palette='viridis')
+    plt.xticks(rotation=45, ha='right')
+    plt.title("Top 10 Average Profit by Movie Genre", fontsize=14)
+    plt.xlabel("Genre")
+    plt.ylabel("Average Profit")
+    plt.show()
+
 
 
    
