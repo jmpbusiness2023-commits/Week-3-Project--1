@@ -152,7 +152,8 @@ def visualize_movies(df):
         data=top15,
         x="profit",
         y="title",
-        orient="h"
+        orient="h",
+        palette='viridis'
     )
     plt.title("Top 15 most profitable movies 💰", fontsize=14, weight='bold')
     plt.xlabel("Profit ($)")
@@ -196,7 +197,7 @@ def visualize_hypothesis_1(df):
     ratings = top10["imdb_rating"].tolist()
 
     plt.figure(figsize=(9,6))
-    plt.barh(titles, ratings)
+    plt.barh(titles, ratings, color='skyblue')
     plt.xlabel("IMDb Rating")
     plt.ylabel("Title")
     plt.title("Top 10 Low-Budget with High IMDb Ratings")
@@ -215,7 +216,7 @@ def visualize_hypothesis_2(df):
 
     # Visualization
     plt.figure(figsize=(10, 6))
-    sns.scatterplot(data=subset, x='imdb_rating', y='profit', alpha=0.7)
+    sns.scatterplot(data=subset, x='imdb_rating', y='profit', alpha=0.7, color='orange')
     plt.title("IMDb Rating vs Profit", fontsize=14)
     plt.xlabel("IMDb Rating")
     plt.ylabel("Profit ($)")
@@ -243,7 +244,7 @@ def visualize_hypothesis_2(df):
     profits = top10["profit"].tolist()
 
     plt.figure(figsize=(9,6))
-    plt.barh(titles, profits)
+    plt.barh(titles, profits, color='lightgreen')
     plt.xlabel("Profit ($)")
     plt.ylabel("Title")
     plt.title("Top 10 Most Profitable High IMDb Rated Movies")
